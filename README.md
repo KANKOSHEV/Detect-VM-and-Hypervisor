@@ -6,7 +6,7 @@ Type of detecthion Hypervisor or VM
 5)SetThreadContext with cpuid  
 6)Compare cpuid list  
 7)xgetbv with VM-exit  
-VMware -> 
-![alt text](https://github.com/LazyAhora/Detect-VM-and-Hypervisor/blob/main/VMware.png)  
+  VMware -> 
+![alt text](https://github.com/LazyAhora/Detect-VM-and-Hypervisor/blob/main/VMware.png)
 Just Windows  ->  
 ![alt text](https://github.com/LazyAhora/Detect-VM-and-Hypervisor/blob/main/JustWindows.png)
