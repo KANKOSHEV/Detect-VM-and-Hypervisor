@@ -1,10 +1,6 @@
 
 #include "DetectHV.hpp"
 
-HANDLE myProc = GetCurrentProcess();
-
-DWORD value = 0x1337;
-
 
 
 
