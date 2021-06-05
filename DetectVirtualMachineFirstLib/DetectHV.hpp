@@ -1,12 +1,16 @@
 #pragma once
 #include "ntdll.h"
 #include <intrin.h>
+#include "AlterApi.h"
 #include <iostream>
 
 
 
 
-extern "C" void BEShit();
+EXTERN_C void BEShit();
+
+EXTERN_C  bool  CheckInd();
+EXTERN_C __int64 LBRVirt();
 namespace DetectHyp {
 
 
@@ -15,21 +19,27 @@ namespace DetectHyp {
 
 
 
-	
- 
+
+
 	inline int GetWindowsBuld()
-	{return *(DWORD*)0x7FFE026C ;  /* KUSER_SHARED_DATA + WindowsBuld		 = 10*/}
+	{
+		return *(DWORD*)0x7FFE026C;  /* KUSER_SHARED_DATA + WindowsBuld		 = 10*/
+	}
 
 	inline int GetBuildNumber()
-	{return 	*(ULONG*)0x07FFE0260;	/*KUSER_SHARED_DATA + NtBuildNumber	   build = 19042*/}
+	{
+		return 	*(ULONG*)0x07FFE0260;	/*KUSER_SHARED_DATA + NtBuildNumber	   build = 19042*/
+	}
 
 
 	inline bool CpuidIsHyperv()
 	{
+		
 		// Query hypervisor precense using CPUID (EAX=1), BIT 31 in ECX 
 		int cpuinf[4] = { 0 };
 		__cpuid(cpuinf, 1);
 		return ((cpuinf[2] >> 31) & 1);
+		
 	}
 
 	inline bool KiSyntheticMsrCheck()
@@ -46,7 +56,7 @@ namespace DetectHyp {
 
 		return TRUE;
 	}
-	
+
 	inline  bool   RdtscCpu()
 	{
 		DWORD tsc1 = 0;
@@ -54,22 +64,51 @@ namespace DetectHyp {
 		DWORD avg = 0;
 		INT cpuInfo[4] = {};
 
-	for (INT i = 0; i < 10; i++)
-			{
+		for (INT i = 0; i < 10; i++)
+		{
 			tsc1 = __rdtsc();
 			__cpuid(cpuInfo, 0);
 			tsc2 = __rdtsc();
 			avg += (tsc2 - tsc1);
-			}
+		}
 		avg = avg / 10;
 
-		return	 (avg < 750 && avg > 0) ? FALSE : TRUE; 
-	
-	
-		
+		return	 (avg < 750 && avg > 0) ? FALSE : TRUE;
+
+
+
 	}
 
+	inline bool Rdtscp() {
+		
 
+
+		unsigned int  blabla = 0;
+		unsigned int tscp1 = 0;
+		unsigned int tscp2 = 0;
+		DWORD avg = 0;
+		INT cpuid[4] = {};
+
+		for (INT  j = 0; j < 200000; j++)
+		{
+				tscp1 = __rdtscp(&blabla);
+				__cpuid(cpuid, 0);
+				tscp2 = __rdtscp(&blabla);
+				avg += tscp2 - tscp1;
+				if (avg < 700 && avg > 0)
+					return false;
+				else
+					avg = 0;
+		}
+		return true;
+		
+
+	}
+		
+
+	
+
+	
 	inline bool  RdtscHeap()
 	{
 		ULONGLONG tsc1;
@@ -93,29 +132,33 @@ namespace DetectHyp {
 				return FALSE;
 		}
 
+
+
 		return TRUE;
 	}
 	inline bool UmpIsSystemVirtualized() {
 		
-			unsigned int invalid_leaf = 0x13371337;
-			unsigned int valid_leaf = 0x40000000;
 
+		unsigned int invalid_leaf = 0x13371337;
+		unsigned int valid_leaf = 0x40000000;
+
+
+
+		int  InvalidLeafResponse[4] = { 0 ,0,0,0 };
+		int ValidLeafResponse[4] = { 0 ,0,0,0 };
+
+		__cpuid(InvalidLeafResponse, invalid_leaf);
+		__cpuid(ValidLeafResponse, valid_leaf);
+
+		if ((InvalidLeafResponse[0] != ValidLeafResponse[0]) ||
+			(InvalidLeafResponse[1] != ValidLeafResponse[1]) ||
+			(InvalidLeafResponse[2] != ValidLeafResponse[2]) ||
+			(InvalidLeafResponse[3] != ValidLeafResponse[3]))
+			return true;
+
+		return false;
 		
 
-			int  InvalidLeafResponse[4] = { 0 ,0,0,0};
-			int ValidLeafResponse[4] = { 0 ,0,0,0};
-
-			__cpuid(InvalidLeafResponse, invalid_leaf);
-			__cpuid(ValidLeafResponse, valid_leaf);
-
-			if ((InvalidLeafResponse[0] != ValidLeafResponse[0]) ||
-				(InvalidLeafResponse[1] != ValidLeafResponse[1]) ||
-				(InvalidLeafResponse[2] != ValidLeafResponse[2]) ||
-				(InvalidLeafResponse[3] != ValidLeafResponse[3]))
-				return true;
-
-			return false;
-		
 	}
 
 
@@ -144,12 +187,13 @@ namespace DetectHyp {
 	}
 
 
+	
 
-
-	inline bool DetectHypBySetThreadCpuid() //shit detect
+	inline bool VehCpuid() //shit detect
 	{
+		
 
-
+		
 		bool bDetected = 0;
 		int singleStepCount = 0;
 		CONTEXT ctx{};
@@ -163,7 +207,7 @@ namespace DetectHyp {
 			BEShit();
 		}
 		__except (filter(GetExceptionCode(), GetExceptionInformation(), bDetected, singleStepCount))
-		
+
 		{
 			if (singleStepCount != 1)
 			{
@@ -171,8 +215,10 @@ namespace DetectHyp {
 			}
 		}
 		return bDetected;
+		
+		
 	}
-	inline bool VMExitxgetbv() {
+	inline bool VMExit_xgetbv() {
 		UINT64 XCR0 = _xgetbv(0);
 
 		__try {
@@ -186,11 +232,99 @@ namespace DetectHyp {
 		}
 		return true;
 	}
+	inline bool SidtExcept() {
+		__try {
+			__sidt(NULL);
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER) {
+			return false;
+		}
+		return true;
+	}
+
+
+
 	
+	inline bool CheckIndv() {
+		bool result = true;
+		__try {			result =  CheckInd();		}
+		__except (EXCEPTION_EXECUTE_HANDLER) 
+		{
+			result = false;
+		}
+		return result;
+	}
+
+	inline bool LBRBadVirtCheck() {
+		bool detect = true;
+
+		__try {
+		  detect = 	LBRVirt() == 1;
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER) {
+			detect = false;
+		}
+		return detect;
+	}
 	
+
+	
+
+	inline bool  CpuidbyName()
+	{
+		
+
+		INT CPUInfo[4] = { -1 };
+		CHAR szHypervisorVendor[0x40];
+		WCHAR* pwszConverted;
+
+		BOOL bResult = FALSE;
+		
+		
+		const TCHAR* szBlacklistedHypervisors[] = {
+			(L"KVMKVMKVM\0\0\0"),	/* KVM */
+			(L"Microsoft Hv"),		/* Microsoft Hyper-V or Windows Virtual PC */
+			(L"VMwareVMware"),		/* VMware */
+			(L"XenVMMXenVMM"),		/* Xen */
+			(L"prl hyperv  "),		/* Parallels */
+			(L"VBoxVBoxVBox"),		/* VirtualBox */
+		};
+
+		WORD dwlength = sizeof(szBlacklistedHypervisors) / sizeof(szBlacklistedHypervisors[0]);
+
+		// __cpuid with an InfoType argument of 0 returns the number of
+		// valid Ids in CPUInfo[0] and the CPU identification string in
+		// the other three array elements. The CPU identification string is
+		// not in linear order. The code below arranges the information 
+		// in a human readable form.
+		__cpuid(CPUInfo, 0x40000000);
+		memset(szHypervisorVendor, 0, sizeof(szHypervisorVendor));
+		memcpy(szHypervisorVendor, CPUInfo + 1, 12);
+
+		for (int i = 0; i < dwlength; i++)
+		{
+			pwszConverted = alternanit_api::CharToWChar_T(szHypervisorVendor);
+			if (pwszConverted) {
+
+				bResult = (wcscmp(pwszConverted, szBlacklistedHypervisors[i]) == 0);
+
+				free(pwszConverted);
+
+				if (bResult)
+					return TRUE;
+			}
+		}
+		
+			
+		return FALSE;
+	}
+
+
 
 
 	inline bool SysHypervInform(){
+		
+
 		SYSTEM_HYPERVISOR_DETAIL_INFORMATION systInformat{0};
 		ULONG retLenth = NULL;
 
@@ -201,14 +335,16 @@ namespace DetectHyp {
 			&retLenth
 			);
 
+
 	//	SYSTEM_HYPERVISOR_DETAIL_INFORMATION -> https://www.geoffchappell.com/studies/windows/km/ntoskrnl/api/ex/sysinfo/hypervisor_detail.htm
 
 
-			 return systInformat.ImplementationLimits.Data[0] != 0
-				 && systInformat.HypervisorInterface.Data[0] != 0
-				 && systInformat.EnlightenmentInfo.Data[0] != 0
-				 && systInformat.HvVendorAndMaxFunction.Data[0] != 0
-				 && systInformat.HvVendorAndMaxFunction.Data[1] != 0;
+			 return systInformat.ImplementationLimits.Data[0] != 0	
+				 &&  systInformat.HypervisorInterface.Data[0] != 0
+				 &&  systInformat.EnlightenmentInfo.Data[0] != 0
+				 &&  systInformat.HvVendorAndMaxFunction.Data[0] != 0
+				 &&  systInformat.HvVendorAndMaxFunction.Data[1] != 0;
+			 
 
 
 		//This do detect 
@@ -228,7 +364,7 @@ namespace DetectHyp {
 		return systInformat.ImplementationLimits.Data[0] != 0;
 		SYSTEM_HYPERVISOR_DETAIL_INFORMATION->HV_IMPLEMENTATION_LIMITS->MaxVirtualProcessorCount
 		*/
-
+	
 	}
 	
 }

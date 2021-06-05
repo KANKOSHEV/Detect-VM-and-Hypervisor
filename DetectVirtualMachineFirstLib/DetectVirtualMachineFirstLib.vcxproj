@@ -145,6 +145,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AlterApi.h" />
     <ClInclude Include="DetectHV.hpp" />
     <ClInclude Include="ntdll.h" />
     <ClInclude Include="Struct.h" />

@@ -19,6 +19,39 @@ typedef struct _SYSTEM_HYPERVISOR_DETAIL_INFORMATION
      } SYSTEM_HYPERVISOR_DETAIL_INFORMATION, * PSYSTEM_HYPERVISOR_DETAIL_INFORMATION;
 
 
+
+
+typedef struct _UNICODE_STRING {
+    USHORT Length;
+    USHORT MaximumLength;
+    PWSTR  Buffer;
+} UNICODE_STRING, * PUNICODE_STRING;
+
+
+
+
+
+    typedef struct _OBJECT_ATTRIBUTES
+{
+    ULONG Length;
+    PVOID RootDirectory;
+    PUNICODE_STRING ObjectName;
+    ULONG Attributes;
+    PVOID SecurityDescriptor;
+    PVOID SecurityQualityOfService;
+} OBJECT_ATTRIBUTES, * POBJECT_ATTRIBUTES;
+
+
+
+
+
+
+
+
+
+
+
+
 typedef enum _SYSTEM_INFORMATION_CLASS
 {
     SystemBasicInformation, // q: SYSTEM_BASIC_INFORMATION
