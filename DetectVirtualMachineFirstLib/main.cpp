@@ -4,9 +4,6 @@
 
 
 
-
-
-
 int main() {
 	
 	
@@ -22,7 +19,7 @@ int main() {
 	std::cout << "Check virt LBR ->\t" << DetectHyp::LBRBadVirtCheck() << '\n';
 	std::cout << "Detect hyp by cpuid & name ->\t" << DetectHyp::CpuidbyName() << '\n';
 	std::cout << "Cpuid is hyperv ->\t" << DetectHyp::CpuidIsHyperv() << '\n';
-	std::cout << "Mistake hyp cpuid ->\t" << DetectHyp::VehCpuid() << '\n';
+	std::cout << "Mistake hyp cpuid ->\t" << DetectHyp::SehCpuid() << '\n';
 	std::cout << "readmsr  0x40000000 ->\t" <<   DetectHyp::KiSyntheticMsrCheck() << '\n';
 	std::cout << "Compare cpuid list ->\t" << DetectHyp::UmpIsSystemVirtualized() << '\n';
 

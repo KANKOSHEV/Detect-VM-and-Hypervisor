@@ -9,9 +9,7 @@
 
 
 
-int virtualCheckSecuretyEngine = 0;
-
-namespace alternanit_api
+namespace alternat_api
 {
 
 	template <typename str_type>

@@ -63,17 +63,16 @@ namespace DetectHyp {
 		DWORD tsc2 = 0;
 		DWORD avg = 0;
 		INT cpuInfo[4] = {};
-
 		for (INT i = 0; i < 10; i++)
-		{
-			tsc1 = __rdtsc();
-			__cpuid(cpuInfo, 0);
-			tsc2 = __rdtsc();
-			avg += (tsc2 - tsc1);
-		}
-		avg = avg / 10;
+			{
+				tsc1 = __rdtsc();
+				__cpuid(cpuInfo, 0);
+				tsc2 = __rdtsc();
+				avg += (tsc2 - tsc1);
+			}
+			avg = avg / 10;
+			return (avg < 500 && avg > 25) ? FALSE : TRUE;
 
-		return	 (avg < 750 && avg > 0) ? FALSE : TRUE;
 
 
 
@@ -89,16 +88,16 @@ namespace DetectHyp {
 		DWORD avg = 0;
 		INT cpuid[4] = {};
 
-		for (INT  j = 0; j < 200000; j++)
+		for (INT j = 0; j < 10; j++)
 		{
-				tscp1 = __rdtscp(&blabla);
-				__cpuid(cpuid, 0);
-				tscp2 = __rdtscp(&blabla);
-				avg += tscp2 - tscp1;
-				if (avg < 700 && avg > 0)
-					return false;
-				else
-					avg = 0;
+			tscp1 = __rdtscp(&blabla);
+			__cpuid(cpuid, 0);
+			tscp2 = __rdtscp(&blabla);
+			avg += tscp2 - tscp1;
+			if (avg < 500 && avg > 25)
+				return false;  
+			else
+				avg = 0;
 		}
 		return true;
 		
@@ -114,9 +113,10 @@ namespace DetectHyp {
 		ULONGLONG tsc1;
 		ULONGLONG tsc2;
 		ULONGLONG tsc3;
-		DWORD i = 0;
 
-		for (i = 0; i < 10; i++)
+
+
+		for (DWORD i = 0; i < 10; i++)
 		{
 			tsc1 = __rdtsc();
 
@@ -127,7 +127,7 @@ namespace DetectHyp {
 			CloseHandle(0);
 
 			tsc3 = __rdtsc();
-
+			
 			if ((LODWORD(tsc3) - LODWORD(tsc2)) / (LODWORD(tsc2) - LODWORD(tsc1)) >= 10)
 				return FALSE;
 		}
@@ -189,10 +189,8 @@ namespace DetectHyp {
 
 	
 
-	inline bool VehCpuid() //shit detect
+	inline bool SehCpuid() 
 	{
-		
-
 		
 		bool bDetected = 0;
 		int singleStepCount = 0;
@@ -213,6 +211,7 @@ namespace DetectHyp {
 			{
 				bDetected = 1;
 			}
+
 		}
 		return bDetected;
 		
@@ -303,7 +302,7 @@ namespace DetectHyp {
 
 		for (int i = 0; i < dwlength; i++)
 		{
-			pwszConverted = alternanit_api::CharToWChar_T(szHypervisorVendor);
+			pwszConverted = alternat_api::CharToWChar_T(szHypervisorVendor);
 			if (pwszConverted) {
 
 				bResult = (wcscmp(pwszConverted, szBlacklistedHypervisors[i]) == 0);
