@@ -1,3 +1,5 @@
+Vershion 1.1  
+Fix:detect rdtscp & rdtsc    
 Type of detecthion Hypervisor or VM  
 1)NtQuerySystemInformation with SystemHypervisorDetailInformation  
 2)rdtsc(with cpuid & GetHeap)  
