@@ -245,25 +245,23 @@ namespace DetectHyp {
 
 	
 	inline bool CheckIndv() {
-		bool result = true;
-		__try {			result =  CheckInd();		}
+		
+		__try {		CheckInd();		}
 		__except (EXCEPTION_EXECUTE_HANDLER) 
 		{
-			result = false;
+			return false;
 		}
-		return result;
+		return true;
 	}
 
 	inline bool LBRBadVirtCheck() {
-		bool detect = true;
-
 		__try {
-		  detect = 	LBRVirt() == 1;
+		 LBRVirt() 
 		}
 		__except (EXCEPTION_EXECUTE_HANDLER) {
-			detect = false;
+			return false;
 		}
-		return detect;
+		return true;
 	}
 	
 
